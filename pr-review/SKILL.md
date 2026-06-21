@@ -1,8 +1,9 @@
 ---
 name: pr-review
 description: |
-  Review GitHub pull requests for correctness, feature/config bloat, and
-  performance. Outputs a concise summary of breaking changes and risks.
+  Review GitHub pull requests for correctness, feature/config bloat,
+  performance, and leaked secrets or local environment information.
+  Outputs a concise summary of breaking changes and risks.
   Recommends splitting oversized PRs. Use when asked to review a PR, branch,
   or diff.
 ---
@@ -59,6 +60,14 @@ Review a pull request, branch, or diff. Use `gh` CLI to fetch PR details and dif
 - Network and I/O: extra roundtrips, missing batching, unbounded reads, missing caching
 - Startup and memory: eager initialization, unbounded growth, missing cleanup
 
+### Leaked Secrets and Local Environment Information
+
+- **Hardcoded secrets:** API keys, tokens, passwords, private keys, connection strings, certificates, signing keys, or any credential-like value committed directly in source code
+- **Accidental leaks in diffs:** secrets visible in removed lines (even if added in a later commit), config files with real values, or dumped logs/stack traces containing sensitive data
+- **Environment-specific paths:** absolute local filesystem paths (e.g., `/Users/...`, `C:\...`, `/home/...`), machine hostnames, internal IPs, or localhost URLs committed in config, logs, or tests
+- **Machine-specific identifiers:** device IDs, serial numbers, internal service endpoints, or cloud account IDs
+- **Unsafe patterns:** `gitignore` files that should exclude but don't (`.env`, `*.pem`, `secrets.json`, etc.), or config files that should be templated but contain real values
+
 ## PR Size Gate
 
 Before deep review, assess scope. The goal is reviewability, not hitting a number. Use judgment:
@@ -85,6 +94,9 @@ Produce a short summary. No preamble, no filler. Use this structure:
 
 ### Risks
 - <list risks with severity: HIGH / MEDIUM / LOW>
+
+### Secrets and Environment Leaks
+- <flag any leaked secrets, credentials, or local environment information with file and line references, or "None">
 
 ### Findings
 - <correctness issues, with file and line references>
