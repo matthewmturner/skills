@@ -60,6 +60,13 @@ Review a pull request, branch, or diff. Use `gh` CLI to fetch PR details and dif
 - Network and I/O: extra roundtrips, missing batching, unbounded reads, missing caching
 - Startup and memory: eager initialization, unbounded growth, missing cleanup
 
+### Documentation
+
+- **Missing docs:** public API changes, new config flags, new commands, or behavioral changes should be reflected in documentation
+- **Stale documentation:** existing docs that contradict the new behavior (e.g., outdated examples, removed flags still listed, changed defaults not noted)
+- **README / usage updates:** if the PR changes how users interact with the project, the README or usage docs should be updated accordingly
+- **Changelog:** significant changes should have a corresponding entry; a version bump **requires** a changelog entry describing what changed
+
 ### Leaked Secrets and Local Environment Information
 
 - **Hardcoded secrets:** API keys, tokens, passwords, private keys, connection strings, certificates, signing keys, or any credential-like value committed directly in source code
@@ -72,7 +79,7 @@ Review a pull request, branch, or diff. Use `gh` CLI to fetch PR details and dif
 
 Before deep review, assess scope. The goal is reviewability, not hitting a number. Use judgment:
 
-- **Around 1500 changed lines** is a rough guideline, not a hard cutoff. A 1200-line PR touching core architecture may need splitting; a 1800-line PR of straightforward renames and formatting does not.
+- Count changed lines **excluding documentation files** (e.g., `*.md`, `*.rst`, `*.txt`, `docs/**`, `README*`, `CHANGELOG*`). Around 1500 changed lines (excluding docs) is a rough guideline, not a hard cutoff. A 1200-line PR touching core architecture may need splitting; a 1800-line PR of straightforward renames and formatting does not.
 - **Touches more than 3 subsystems or domains** without a single unifying change: recommend splitting
 - **Mixes refactoring with new features or bug fixes:** recommend splitting
 - **Has no clear single-purpose description:** recommend splitting
@@ -94,6 +101,9 @@ Produce a short summary. No preamble, no filler. Use this structure:
 
 ### Risks
 - <list risks with severity: HIGH / MEDIUM / LOW>
+
+### Documentation
+- <flag missing, stale, or outdated documentation, or "None">
 
 ### Secrets and Environment Leaks
 - <flag any leaked secrets, credentials, or local environment information with file and line references, or "None">
