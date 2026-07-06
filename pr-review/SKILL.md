@@ -27,8 +27,26 @@ Review a pull request, branch, or diff. Use `gh` CLI to fetch PR details and dif
    - Flag missing details: e.g., the body says "fix auth bug" but the diff also adds a new config flag and changes the database schema.
    - Flag misleading claims: e.g., the body describes a small refactor but the diff adds an entirely new module.
 3. **Inspect key files.** For non-trivial changes, read the full source of affected files to understand context the diff alone hides.
-4. **Evaluate against criteria** (see below).
-5. **Output the summary** (see format below).
+4. **Independently verify the changes** when practical (see "Independent Verification" below).
+5. **Evaluate against criteria** (see below).
+6. **Output the summary** (see format below).
+
+## Independent Verification
+
+Don't take the PR's word for it — tests passing is evidence, not proof. Tests written in the same PR often encode the same misunderstanding as the code. When practical, verify the claimed behavior yourself:
+
+- **Check out the PR branch** (`gh pr checkout <number>`) and exercise the changed behavior directly: run the CLI command, call the function in a REPL or scratch script, hit the endpoint, reproduce the bug the PR claims to fix and confirm it's gone.
+- **Verify the bug existed before.** For bug fixes, confirm the broken behavior on the base branch first — otherwise you can't tell whether the fix does anything.
+- **Probe edge cases the tests skip:** empty inputs, boundary values, error paths, the states flagged in the criteria below.
+- **Read test assertions skeptically:** do they assert the actual desired outcome, or just that the code ran? Watch for tests that mock away the very thing the PR changes.
+
+Only do this when it's practical. Skip independent verification when:
+
+- The change has no runtime surface to exercise (docs, comments, formatting, pure renames).
+- Setup cost is prohibitive: the change needs credentials, external services, production data, or infrastructure you don't have.
+- The change is mechanical and low-risk (dependency bumps with no API changes, generated code).
+
+When you skip it, don't pretend otherwise — note in the summary that the review was static-only and why. When you do verify, state what you ran and what you observed, not just "verified."
 
 ## Criteria
 
@@ -54,6 +72,19 @@ Review a pull request, branch, or diff. Use `gh` CLI to fetch PR details and dif
 - **Exhaustiveness at the call site:** switch/match statements over the enum should handle every member explicitly (or have a clearly-intentional default); a new enum value added without updating existing switches is a correctness risk, not just a style nit.
 - **Derived vs. stored state:** if a "state" can be computed from other fields (e.g., `isExpired` from a timestamp), flag storing it redundantly as its own enum member — it can drift out of sync.
 - **Naming clarity:** state names should describe what *is true now*, not a past action or transition (e.g., prefer `archived` over `deleted` if the record still exists and is just hidden).
+
+### Implicit vs. Explicit Behavior
+
+Explicit behavior should be preferred whenever possible. Call out places where behavior is implicit instead of explicit:
+
+- **Hidden defaults:** behavior that depends on an unstated default (e.g., a function silently falling back to a default value, region, or config when an argument is omitted) instead of requiring the caller to state intent
+- **Magic values and conventions:** behavior triggered by naming conventions, file locations, environment variables, or sentinel values (`null`, `-1`, empty string) rather than an explicit parameter or setting
+- **Implicit type coercion and truthiness:** logic that relies on coercion or loose truthiness checks where an explicit comparison would state the intended condition
+- **Side effects and action at a distance:** functions that mutate shared state, auto-register handlers, or change behavior elsewhere without the call site making that visible
+- **Implicit ordering dependencies:** code that only works if callers invoke things in a particular order, without enforcing or documenting that order
+- **Silent fallbacks:** catch-and-continue or default-on-error paths that mask failures instead of surfacing them explicitly
+
+When flagging, suggest the explicit alternative (a required parameter, a named constant, an explicit check, a raised error).
 
 ### Feature and Config Bloat
 
@@ -105,6 +136,8 @@ Produce a short summary. No preamble, no filler. Use this structure:
 
 **Scope:** <one-line summary of what the PR does>
 
+**Verification:** <what was independently exercised and observed, or "static review only" with the reason>
+
 ### Breaking Changes
 - <list breaking changes, or "None">
 
@@ -119,6 +152,7 @@ Produce a short summary. No preamble, no filler. Use this structure:
 
 ### Findings
 - <correctness issues, with file and line references>
+- <implicit behavior that should be explicit, with the suggested explicit alternative>
 - <bloat or scope concerns>
 - <performance concerns>
 
