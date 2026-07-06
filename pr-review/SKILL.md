@@ -46,6 +46,15 @@ Review a pull request, branch, or diff. Use `gh` CLI to fetch PR details and dif
 - If the description claims changes that are not present in the diff, flag the mismatch.
 - If the description is vague ("misc fixes", "updates") while the diff is substantial, call it out.
 
+### State and Enum Modeling
+
+- **One dimension per enum:** each enum/status field should represent a single axis of meaning. Flag cases where a state conflates two independent concerns (e.g., a `status` field mixing "is this approved" with "is this archived" — that's two booleans wearing one enum).
+- **No overloaded members:** flag values that are reused to signal different things in different contexts (e.g., `null`/`"pending"`/`-1` each meaning something different depending on which code path reads them), or a single member standing in for multiple distinct real-world states (e.g., `"inactive"` meaning both "never activated" and "deactivated after use" when callers need to distinguish them).
+- **Exhaustive and non-overlapping:** the set of values should cover every state the domain can actually be in, with no two values describing the same underlying condition. Watch for missing states that get bolted on later as a stringly-typed workaround (e.g., a `notes` or boolean flag added beside the enum instead of extending it).
+- **Exhaustiveness at the call site:** switch/match statements over the enum should handle every member explicitly (or have a clearly-intentional default); a new enum value added without updating existing switches is a correctness risk, not just a style nit.
+- **Derived vs. stored state:** if a "state" can be computed from other fields (e.g., `isExpired` from a timestamp), flag storing it redundantly as its own enum member — it can drift out of sync.
+- **Naming clarity:** state names should describe what *is true now*, not a past action or transition (e.g., prefer `archived` over `deleted` if the record still exists and is just hidden).
+
 ### Feature and Config Bloat
 
 - **Scope creep:** does the PR mix unrelated changes, or add features beyond the stated goal?
