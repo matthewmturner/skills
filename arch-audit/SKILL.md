@@ -62,50 +62,71 @@ Sort findings by severity: `Critical` > `High` > `Medium` > `Low` > `Unknown`. W
 
 De-duplicate by package where useful (a package can appear in multiple advisories); keep each advisory as its own row but consider a per-package rollup for the summary counts.
 
-## Output Format
+### 5. Build the JSON data file
 
-```markdown
-## Arch Audit Report
+Assemble the classified findings into a JSON object with this structure:
 
-**Scanned:** <package count> installed packages
-**Vulnerable packages found:** <N> across <M> advisories
-
-### Summary
-
-| Severity | Advisories | Fixable now | No fix available |
-|----------|-----------|-------------|-------------------|
-| Critical | ... | ... | ... |
-| High     | ... | ... | ... |
-| Medium   | ... | ... | ... |
-| Low      | ... | ... | ... |
-| Unknown  | ... | ... | ... |
-
-### Findings
-
-| Severity | Package | Type | CVEs | Fixed In | Recommendation |
-|----------|---------|------|------|----------|----------------|
-| High | pam | arbitrary filesystem access | CVE-2025-6020 | — | No fix yet — track https://security.archlinux.org/AVG-2901 |
-| High | libxml2 | denial of service | CVE-2025-6170, ... | 2.13.9-1 | `sudo pacman -Syu libxml2` |
-
-### Remediation Steps
-
-1. **Fixable now:** run `sudo pacman -Syu` to pull all available fixes in one pass (or update the specific packages listed above individually).
-2. **No fix available:** <list mitigations per package, or "monitor the advisories below for updates">.
-3. Re-run the audit after updating to confirm the fixable set is cleared: `arch-audit --json --show-cve`.
-
-### Reverse-Dependency Watch _(only if `--recursive` surfaced extra packages)_
-
-- <package> depends on <vulnerable package> — not independently vulnerable, but rebuild/restart it after the underlying package is updated.
+```json
+{
+  "scanned": 1234,
+  "has_findings": true,
+  "vulnerable_packages": 5,
+  "advisories": 6,
+  "summary": [
+    { "severity": "Critical", "advisories": 1, "fixable": 1, "no_fix": 0 },
+    { "severity": "High", "advisories": 3, "fixable": 2, "no_fix": 1 }
+  ],
+  "findings": [
+    {
+      "severity": "High",
+      "package": "pam",
+      "type": "arbitrary filesystem access",
+      "cves": "CVE-2025-6020",
+      "fixed_in": "—",
+      "recommendation": "No fix yet — track https://security.archlinux.org/AVG-2901"
+    },
+    {
+      "severity": "High",
+      "package": "libxml2",
+      "type": "denial of service",
+      "cves": "CVE-2025-6170, CVE-2025-6171",
+      "fixed_in": "2.13.9-1",
+      "recommendation": "`sudo pacman -Syu libxml2`"
+    }
+  ],
+  "no_fix_notes": [
+    "pam: consider firewalling or disabling the service; track https://security.archlinux.org/AVG-2901"
+  ],
+  "reverse_deps": [
+    { "package": "systemd", "depends_on": "pam" }
+  ]
+}
 ```
 
-If no vulnerabilities are found, skip the tables and report:
+Field rules:
 
-```markdown
-## Arch Audit Report
+- `scanned`: total installed package count from `pacman -Q | wc -l`.
+- `has_findings`: `false` when `arch-audit` returned an empty array; `true` otherwise. When `false`, only `scanned` is required — every other field may be omitted.
+- `summary`: one row per severity tier that actually has findings, in severity order (`Critical` > `High` > `Medium` > `Low` > `Unknown`). `advisories` = count of advisories in that tier; `fixable` / `no_fix` = how many have a non-null / null `fixed` version.
+- `findings`: one row per advisory, sorted by severity then **Fixable now** first. `cves` = the `issues` array joined with `", "`. `fixed_in` = the `fixed` version string, or `"—"` when null. `recommendation` = the update command or mitigation string per step 3.
+- `no_fix_notes`: one short mitigation string per **No fix available** package (omit the array or leave it empty when there are none). Keep these scannable — the template renders them as sub-bullets under the "No fix available" remediation step.
+- `reverse_deps`: one entry per reverse-dependency surfaced by `--recursive`, with `package` (the dependent) and `depends_on` (the vulnerable package). Omit or leave empty when `--recursive` produced nothing extra.
 
-**Scanned:** <package count> installed packages
-No known-vulnerable packages found. System is clean as of <scan context, e.g. current CVE tracker data>.
+### 6. Render the report
+
+Render the output using `minijinja-cli`:
+
+```bash
+minijinja-cli template.j2 /path/to/data.json
 ```
+
+Read and present the rendered output. The template handles all formatting — header, summary and findings tables, remediation steps, reverse-dependency watch section, and the no-findings case. Do not construct the report markdown manually; always use the template renderer. If `minijinja-cli` is not available, install it with:
+
+```bash
+cargo install minijinja-cli
+```
+
+**Note:** the template lives at `template.j2` alongside this SKILL.md.
 
 ## Notes
 

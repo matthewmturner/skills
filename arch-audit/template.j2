@@ -1,0 +1,39 @@
+## Arch Audit Report
+
+**Scanned:** {{ scanned }} installed packages
+{%- if not has_findings %}
+No known-vulnerable packages found. System is clean as of current CVE tracker data.
+{%- else %}
+**Vulnerable packages found:** {{ vulnerable_packages }} across {{ advisories }} advisories
+
+### Summary
+
+| Severity | Advisories | Fixable now | No fix available |
+|----------|-----------|-------------|-------------------|
+{%- for row in summary %}
+| {{ row.severity }} | {{ row.advisories }} | {{ row.fixable }} | {{ row.no_fix }} |
+{%- endfor %}
+
+### Findings
+
+| Severity | Package | Type | CVEs | Fixed In | Recommendation |
+|----------|---------|------|------|----------|----------------|
+{%- for row in findings %}
+| {{ row.severity }} | {{ row.package }} | {{ row.type }} | {{ row.cves }} | {{ row.fixed_in }} | {{ row.recommendation }} |
+{%- endfor %}
+
+### Remediation Steps
+
+1. **Fixable now:** run `sudo pacman -Syu` to pull all available fixes in one pass (or update the specific packages listed above individually).
+2. **No fix available:**{% if no_fix_notes|length > 0 %}{% for note in no_fix_notes %}
+   - {{ note }}{% endfor %}{% else %} monitor the advisories above for updates.{% endif %}
+3. Re-run the audit after updating to confirm the fixable set is cleared: `arch-audit --json --show-cve`.
+{%- if reverse_deps|length > 0 %}
+
+### Reverse-Dependency Watch
+
+{% for row in reverse_deps -%}
+- {{ row.package }} depends on {{ row.depends_on }} — not independently vulnerable, but rebuild/restart it after the underlying package is updated.
+{% endfor -%}
+{%- endif %}
+{%- endif %}
