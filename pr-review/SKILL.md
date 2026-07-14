@@ -86,6 +86,18 @@ Explicit behavior should be preferred whenever possible. Call out places where b
 
 When flagging, suggest the explicit alternative (a required parameter, a named constant, an explicit check, a raised error).
 
+### Missed Existing Abstractions
+
+For new features or logic, check whether the codebase already has abstractions that would serve the same purpose. This requires reading code outside the diff — look at the broader module, sibling files, shared utilities, base classes, middleware, and established patterns.
+
+- **Reimplemented patterns:** new code that duplicates logic already available in a utility function, helper, base class, or shared module (e.g., hand-rolled auth check when a middleware already exists, manual pagination when a helper is available)
+- **Parallel types:** a new type, interface, or struct that shadows an existing one with the same shape or intent, instead of reusing or extending it
+- **Bypassed middleware/hooks/interceptors:** business logic that manually replicates what a framework hook, middleware, interceptor, or decorator already provides
+- **Inconsistent conventions:** new code that follows a different pattern from what the rest of the codebase uses (e.g., callbacks where the project uses async/await, manual resource management where a context manager or defer exists)
+- **Library ecosystem:** new dependencies added when existing dependencies already solve the problem
+
+When flagging, reference the existing abstraction (file + line) and suggest how the new code could use or extend it instead.
+
 ### Feature and Config Bloat
 
 - **Scope creep:** does the PR mix unrelated changes, or add features beyond the stated goal?
