@@ -1,0 +1,58 @@
+## LeaseHackr Report: {{ class_display }} in {{ location_display }}
+
+**Window:** {% if signed_days is defined %}signed deals last {{ signed_days }} days · offers last {{ days }} days{% else %}last {{ days }} days{% endif %} · generated {{ generated_at }}
+{%- if not has_results %}
+
+No matching topics found. Try widening the window (`--days 60`), dropping the
+luxury filter (use the base body-style class), or searching `-l nationwide`.
+{%- else %}
+{%- if highlights|length > 0 %}
+
+### Takeaways
+
+{% for h in highlights -%}
+- {{ h }}
+{% endfor -%}
+{%- endif %}
+{%- if signed|length > 0 %}
+
+### Community-Signed Deals
+
+Actual deals reported signed by forum members (Signed Deals & Tips) — real
+transacted prices, the benchmark to negotiate against.
+
+| # | Vehicle | Deal Terms | Eff. Monthly | LH Score | Signed |
+|---|---------|-----------|--------------|----------|--------|
+{%- for d in signed %}
+| {{ d.rank }} | [{{ d.vehicle }}]({{ d.url }}) | {{ d.terms }} | {{ d.eff_monthly }} | {{ d.lh_score }} | {{ d.date }} |
+{%- endfor %}
+{%- endif %}
+{%- if hot_offers | default([]) | length > 0 %}
+
+### ⚡ Limited & High-Demand Offers
+
+One-off specials pulled from brokers' most recent posts — quantity- or
+time-limited, quoted in the broker's own words. These move fast; verify
+availability before anything else.
+
+| Offer | Terms | LH Score | Urgency Signal | Posted | Availability |
+|-------|-------|----------|----------------|--------|--------------|
+{%- for h in hot_offers %}
+| [{{ h.offer }}]({{ h.url }}) | {{ h.terms }} | {{ h.lh_score }} | "{{ h.urgency }}" | {{ h.posted }} | {{ h.availability }} |
+{%- endfor %}
+{%- endif %}
+{%- if marketplace|length > 0 %}
+
+### Broker & Marketplace Offers
+
+Dealer/broker advertisements — offers, not endorsements.
+
+| # | Offer | Price Signals | Eff. Monthly | LH Score | Availability | Last Active |
+|---|-------|--------------|--------------|----------|--------------|-------------|
+{%- for o in marketplace %}
+| {{ o.rank }} | [{{ o.offer }}]({{ o.url }}) | {{ o.signals }} | {{ o.eff_monthly }} | {{ o.lh_score }} | {{ o.availability }} | {{ o.updated }} |
+{%- endfor %}
+{%- endif %}
+{%- endif %}
+
+*Ranked by [Leasehackr Score](https://leasehackr.com/blog/2018/8/28/help-am-i-getting-a-good-deal): the years of effective payments it would take to equal MSRP — higher is better (~8+ solid, 10+ excellent, below ~6 weak). Effective monthly = (monthly × term + due at signing + fees) ÷ term, refundable MSDs excluded; MSRP is tax-adjusted when the payment includes tax. Unranked (—) rows lack enough published numbers to score. Marketplace listings are dealer/broker advertisements; signed deals are community reports. Advertised prices often exclude tax and fees — verify current terms and shipping/delivery costs in-thread.*
