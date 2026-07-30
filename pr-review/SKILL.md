@@ -86,6 +86,21 @@ Explicit behavior should be preferred whenever possible. Call out places where b
 
 When flagging, suggest the explicit alternative (a required parameter, a named constant, an explicit check, a raised error).
 
+### Implementation Approach (new features only)
+
+For PRs that introduce new features (as opposed to pure refactors, bug fixes, dependency bumps, docs, or formatting), produce an *independent* explanation of how the change is implemented — not a restatement of the PR description. Read the actual code and describe it in your own terms so a reviewer can sanity-check the approach without reading every line.
+
+Cover what's actually relevant to the change (not every item applies to every feature; omit the irrelevant ones):
+
+- **Algorithms and data structures:** the core logic — what algorithm is used, what data structures carry the state, why those choices fit the problem (or don't). Note complexity where it matters.
+- **Control flow and state transitions:** how the feature moves through its states, where decisions branch, where state is held and mutated, and what invariant (if any) the design relies on.
+- **Integration with the existing system:** how the new code connects to what's already there — entry points, call sites, shared modules, framework hooks, persistence, configuration, and anything the feature depends on or alters. Reference the existing code by file and line.
+- **Boundaries and contracts:** what the feature assumes about its inputs and downstream consumers, where it crosses module/service boundaries, and whether those contracts are explicit.
+- **Concurrency and ordering:** any reliance on ordering, locking, queues, or eventual consistency, and the failure modes if those assumptions break.
+- **Notable design tradeoffs:** places where the implementation picked one of several viable approaches — name the alternative considered implicitly, if it matters for review.
+
+This section is your own account of the implementation, not a summary of the PR body. If the PR description's explanation of approach conflicts with what the code actually does, call that out here.
+
 ### Missed Existing Abstractions
 
 For new features or logic, check whether the codebase already has abstractions that would serve the same purpose. This requires reading code outside the diff — look at the broader module, sibling files, shared utilities, base classes, middleware, and established patterns.
@@ -149,6 +164,9 @@ Produce a short summary. No preamble, no filler. Use this structure:
 **Scope:** <one-line summary of what the PR does>
 
 **Verification:** <what was independently exercised and observed, or "static review only" with the reason>
+
+### Implementation Approach
+- <only for PRs introducing new features: an independent explanation of the implementation — algorithms, data structures, control flow, integration with the existing system (with file and line references), boundaries, concurrency, and notable design tradeoffs. Omit the whole section for refactors, bug fixes, dependency bumps, docs, and formatting changes.>
 
 ### Breaking Changes
 - <list breaking changes, or "None">
