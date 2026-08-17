@@ -57,6 +57,17 @@ When you skip it, don't pretend otherwise — note in the summary that the revie
 - Regression risk: does the change break existing callers, public APIs, or documented contracts?
 - Test coverage: are new code paths tested? Are existing tests still relevant?
 
+### Test Value
+
+Not all tests are worth their cost. Review added tests for whether they actually catch regressions or encode real behavior:
+
+- **Tests that don't add value:** tests that only restate the implementation (mirror the code's structure and assert it did what it just did), assert trivial invariants (`not null`, `length > 0`), or mock away the behavior under test so they can never fail for the right reason. Flag them as noise that adds maintenance burden without reducing risk.
+- **Unit tests where integration/e2e belongs:** outside of core algorithms (pure logic, parsers, state machines, data transformations, numerical code), most bugs live at boundaries — framework wiring, config loading, serialization, network/DB interactions, module composition. Prefer integration/e2e tests there over tests that mock collaborators to exercise a unit in isolation. Flag unit tests glued to internals (private methods, implementation details, specific call sequences) that should be replaced by a coarser test through the real public surface.
+- **Coverage-chasing tests:** tests added to move a coverage number rather than to protect a real code path. Signal: they exercise happy-path branches already covered by existing tests, or assert on incidental details (exact log strings, internal field order) that lock in implementation rather than contract.
+- **Where unit tests *do* belong:** core algorithms and pure logic with well-defined inputs/outputs and many edge cases — these are exactly where focused unit tests pay off, and their absence is worth flagging.
+
+When flagging, suggest the replacement: drop the test, or replace it with an integration/e2e test that exercises the behavior through the real entry point.
+
 ### Description Alignment
 
 - The PR description must accurately reflect all changes in the diff.
