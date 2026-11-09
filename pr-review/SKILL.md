@@ -97,6 +97,40 @@ Explicit behavior should be preferred whenever possible. Call out places where b
 
 When flagging, suggest the explicit alternative (a required parameter, a named constant, an explicit check, a raised error).
 
+### Special Cases
+
+Look for special cases: branches, early returns, or lookup entries that handle specific values, inputs, or callers differently from the general path (e.g., `if user.id == 42`, `if region == "eu-west-1"`, a hardcoded allowlist, a one-off flag check). For each one, understand why it exists before accepting it:
+
+- **Is it actually needed?** Confirm the general path fails for this case. Often a special case papers over a bug in the general logic, and fixing that bug removes the need for the branch.
+- **Why only these cases?** If the code handles `A` and `B` specially, ask what makes them different from `C` and `D`. A special case usually implies a category; check whether other members of that category are silently unhandled.
+- **Is the rationale recorded?** The reason for a special case should be in a comment, the PR description, or a linked issue. An unexplained special case becomes untouchable code that nobody dares to remove.
+- **Does it belong in data or config?** A growing list of hardcoded cases may be better expressed as a property of the data (a field, a type, a capability) than as branches in code.
+- **Is it tested?** Each special case is a distinct code path. Confirm a test covers it and that the test states why the case is special.
+- **Will it go stale?** Special cases for a specific customer, migration, date, or temporary incident should have a removal condition or a tracking issue.
+
+When flagging, ask the author the specific question (why this case, why only these cases) and suggest the general alternative if one exists.
+
+### Technical Solutions to Human Problems
+
+Treat code that tries to solve a human or process problem with a technical mechanism as a likely antipattern. The root cause is usually communication, ownership, process, or trust, and the code only hides the symptom while adding permanent complexity.
+
+Signals to look for:
+
+- **Guarding against teammates:** checks, locks, or validations that exist because one team or person keeps misusing an API, instead of fixing the contract or talking to them (e.g., a runtime check that rejects calls from a specific service).
+- **Encoding a process in code:** approval gates, manual-override flags, or workflow states added because people skip a step, when the real fix is a review process, a checklist, or a clear owner.
+- **Compensating for unclear ownership:** retry loops, reconciliation jobs, or "self-healing" logic that cleans up after another system nobody owns or nobody will fix.
+- **Working around missing communication:** compatibility shims, duplicate code paths, or feature flags kept alive because coordinating a change with another team feels harder than writing code.
+- **Policing behavior:** linters, hooks, or CI rules added in response to one incident, with no agreement from the team that the rule is the right norm.
+- **Tooling instead of a decision:** configuration knobs or abstractions added because stakeholders disagree, so the code supports every option instead of someone making a choice.
+
+For each case, ask:
+
+- What human or organizational problem caused this change?
+- Did anyone try to solve that problem directly (a conversation, a documented contract, an owner, a process change)?
+- Who will maintain this mechanism, and will it still make sense after the people or situation change?
+
+Not every case is wrong. Automation that enforces a norm the team already agreed on (e.g., a formatter, a required CI check) is legitimate. Flag the change when the technical mechanism is a substitute for a missing agreement, not the enforcement of one. When flagging, name the underlying human problem and suggest the non-code action (talk to the owning team, document the contract, assign an owner, make the decision) alongside or instead of the code.
+
 ### Implementation Approach (new features only)
 
 For PRs that introduce new features (as opposed to pure refactors, bug fixes, dependency bumps, docs, or formatting), produce an *independent* explanation of how the change is implemented — not a restatement of the PR description. Read the actual code and describe it in your own terms so a reviewer can sanity-check the approach without reading every line.
@@ -194,6 +228,8 @@ Produce a short summary. No preamble, no filler. Use this structure:
 ### Findings
 - <correctness issues, with file and line references>
 - <implicit behavior that should be explicit, with the suggested explicit alternative>
+- <unjustified or incomplete special cases, with the question for the author and the general alternative>
+- <technical solutions to human or process problems, with the underlying problem and the suggested non-code action>
 - <bloat or scope concerns>
 - <performance concerns>
 
