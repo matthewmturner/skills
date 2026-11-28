@@ -1,0 +1,11 @@
+{
+  "name": "arch-linux",
+  "version": "1.0.1",
+  "description": "Arch Linux package update checks and CVE audits",
+  "author": {
+    "name": "Matthew Turner"
+  },
+  "repository": "https://github.com/matthewmturner/skills",
+  "license": "MIT",
+  "skills": "./skills/"
+}

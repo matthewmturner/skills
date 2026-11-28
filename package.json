@@ -1,0 +1,12 @@
+{
+  "name": "mturner-skills",
+  "version": "1.1.0",
+  "description": "Personal agent skills grouped by area",
+  "license": "MIT",
+  "repository": "https://github.com/matthewmturner/skills",
+  "pi": {
+    "skills": [
+      "./plugins/*/skills"
+    ]
+  }
+}

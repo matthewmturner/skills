@@ -1,0 +1,56 @@
+{
+  "name": "mturner-skills",
+  "interface": {
+    "displayName": "mturner-skills"
+  },
+  "plugins": [
+    {
+      "name": "dev-workflow",
+      "source": {
+        "source": "local",
+        "path": "./plugins/dev-workflow"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_USE"
+      },
+      "category": "Developer Tools"
+    },
+    {
+      "name": "arch-linux",
+      "source": {
+        "source": "local",
+        "path": "./plugins/arch-linux"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_USE"
+      },
+      "category": "Developer Tools"
+    },
+    {
+      "name": "embeddings",
+      "source": {
+        "source": "local",
+        "path": "./plugins/embeddings"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_USE"
+      },
+      "category": "Developer Tools"
+    },
+    {
+      "name": "personal",
+      "source": {
+        "source": "local",
+        "path": "./plugins/personal"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_USE"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

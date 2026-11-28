@@ -1,0 +1,11 @@
+{
+  "name": "personal",
+  "version": "1.0.1",
+  "description": "Car lease deals, flight search, and Socratic tutoring",
+  "author": {
+    "name": "Matthew Turner"
+  },
+  "repository": "https://github.com/matthewmturner/skills",
+  "license": "MIT",
+  "skills": "./skills/"
+}

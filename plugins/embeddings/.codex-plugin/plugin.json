@@ -1,0 +1,11 @@
+{
+  "name": "embeddings",
+  "version": "1.0.1",
+  "description": "Ingest documents into a local Qdrant vector database and query them",
+  "author": {
+    "name": "Matthew Turner"
+  },
+  "repository": "https://github.com/matthewmturner/skills",
+  "license": "MIT",
+  "skills": "./skills/"
+}

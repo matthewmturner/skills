@@ -5,56 +5,56 @@
   },
   "metadata": {
     "description": "Personal agent skills grouped by area",
-    "version": "1.0.0"
+    "version": "1.1.0"
   },
   "plugins": [
     {
       "name": "dev-workflow",
       "description": "Code review, security and performance audits, coding style, and repository analysis",
-      "version": "1.0.0",
-      "source": "./",
+      "version": "1.0.1",
+      "source": "./plugins/dev-workflow",
       "strict": false,
       "skills": [
-        "./pr-review",
-        "./security-audit",
-        "./perf-optimization",
-        "./tigerstyle",
-        "./summarize-repo-changes",
-        "./search-repos"
+        "./skills/pr-review",
+        "./skills/security-audit",
+        "./skills/perf-optimization",
+        "./skills/tigerstyle",
+        "./skills/summarize-repo-changes",
+        "./skills/search-repos"
       ]
     },
     {
       "name": "arch-linux",
       "description": "Arch Linux package update checks and CVE audits",
-      "version": "1.0.0",
-      "source": "./",
+      "version": "1.0.1",
+      "source": "./plugins/arch-linux",
       "strict": false,
       "skills": [
-        "./arch-audit",
-        "./check-pacman-updates"
+        "./skills/arch-audit",
+        "./skills/check-pacman-updates"
       ]
     },
     {
       "name": "embeddings",
       "description": "Ingest documents into a local Qdrant vector database and query them",
-      "version": "1.0.0",
-      "source": "./",
+      "version": "1.0.1",
+      "source": "./plugins/embeddings",
       "strict": false,
       "skills": [
-        "./embeddings-ingest",
-        "./embeddings-query"
+        "./skills/embeddings-ingest",
+        "./skills/embeddings-query"
       ]
     },
     {
       "name": "personal",
       "description": "Car lease deals, flight search, and Socratic tutoring",
-      "version": "1.0.0",
-      "source": "./",
+      "version": "1.0.1",
+      "source": "./plugins/personal",
       "strict": false,
       "skills": [
-        "./lease-hackr",
-        "./search-flights",
-        "./socratic-tutor"
+        "./skills/lease-hackr",
+        "./skills/search-flights",
+        "./skills/socratic-tutor"
       ]
     }
   ]
